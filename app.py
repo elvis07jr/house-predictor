@@ -30,6 +30,9 @@ def predict_price(model, input_data):
         # Select features for prediction (without target column)
         features_selected = select_features(features_df, mode='predict')
         
+        # Debug: show the features being used
+        st.write("Features used for prediction:", features_selected.columns.tolist())
+        
         # Make prediction
         prediction = model.predict(features_selected)[0]
         return prediction
@@ -38,6 +41,8 @@ def predict_price(model, input_data):
         st.error(f"Prediction error: {str(e)}")
         # Debug information
         st.write("Input data columns:", input_data.columns.tolist())
+        if 'features_selected' in locals():
+            st.write("Feature columns:", features_selected.columns.tolist())
         raise e
 
 def main():
