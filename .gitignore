@@ -22,3 +22,4 @@ rad.json
 TestResults.xml__pycache__/
 *.pyc
 *.pyo
+model.pkl
