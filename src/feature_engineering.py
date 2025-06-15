@@ -8,7 +8,7 @@ def create_features(df, mode='predict'):
         df: Input dataframe
         mode: 'train' or 'predict' - determines which features to create
     """
-    # Base features that don't depend on target
+    # Base features that don't depend on target - SAME FOR BOTH MODES
     df_features = df.assign(
         # Create meaningful features
         rooms_per_household=lambda x: x.AveRooms,
@@ -17,30 +17,29 @@ def create_features(df, mode='predict'):
         # Location features
         lat_long_interaction=lambda x: x.Latitude * x.Longitude,
         # Income per room (economic density)
-        income_per_room=lambda x: x.MedInc / x.AveRooms
+        income_per_room=lambda x: x.MedInc / x.AveRooms,
+        # Population per household (more useful than population per room)
+        population_per_household=lambda x: x.Population / x.AveOccup
     )
     
-    # Only create target-dependent features during training
-    if mode == 'train' and 'target' in df.columns:
-        df_features = df_features.assign(
-            price_per_room=lambda x: x.target / x.AveRooms
-        )
+    # DON'T create target-dependent features - they cause prediction issues
+    # Removed: price_per_room feature to ensure train/predict consistency
     
     return df_features
 
 def select_features(df, mode='predict'):
     """Step 5: Feature selection"""
-    # Base feature columns (available in both train and predict)
+    # Feature columns that work for BOTH training and prediction
     feature_cols = [
         'MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 
         'Population', 'AveOccup', 'Latitude', 'Longitude',
         'rooms_per_household', 'bedrooms_per_room', 
-        'population_per_room', 'lat_long_interaction', 'income_per_room'
+        'population_per_room', 'lat_long_interaction', 
+        'income_per_room', 'population_per_household'
     ]
     
     if mode == 'train' and 'target' in df.columns:
-        # Include target-dependent features and target column for training
-        feature_cols.append('price_per_room')
+        # For training, include target column
         return df[feature_cols + ['target']]
     else:
         # For prediction, only return feature columns
